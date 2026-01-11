@@ -13,7 +13,6 @@ const AnalyticsCard = ({ title, url_endpoint }) => {
     if(response.data.success)
     {
       setOrderCount(response.data.totalOrders);
-      console.log(response.data.totalOrders);
       
     }
     else{

@@ -66,8 +66,6 @@ const saveProfile = async (e) => {
     },
   };
 
-  console.log("Payload sent to backend:", payload);
-
   try {
     const addedData = await axios.post(
       url + "/api/user/profile/add",
@@ -154,4 +152,3 @@ const saveProfile = async (e) => {
 };
 
 export default Profile;
-

@@ -55,7 +55,6 @@ const registerUser = async (req,res) => {
         const hashedPassword = await bcrypt.hash(password, salt)
 
         const newUser = new userModel({name, email, password: hashedPassword});
-        console.log(newUser)
         const user = await newUser.save();
         const token = createToken(user._id)
         res.json({success:true,token})
@@ -68,10 +67,7 @@ const registerUser = async (req,res) => {
 
 const getUserProfile = async (req, res) => {
     try {
-        console.log(req.body.userId);
         let userData = await userModel.findById(req.body.userId);
-        console.log("name: ",userData.name);
-        console.log("email: ",userData.email);
         return res.status(200).json({success:true, name:userData.name, email:userData.email});
     } catch (error) {
         console.log(error);
@@ -81,10 +77,7 @@ const getUserProfile = async (req, res) => {
 
 const getUserProfileData = async (req, res) => {
     try {
-        console.log(req.body.userId);
         let userData = await userModel.findById(req.body.userId);
-        console.log("name: ",userData.name);
-        console.log("email: ",userData.email);
         const userRelatedData = {
             name: userData.name,
             email: userData.email,
