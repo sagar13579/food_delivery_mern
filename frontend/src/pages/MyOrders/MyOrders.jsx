@@ -14,7 +14,7 @@ const MyOrders = () => {
       {},
       { headers: { token } }
     );
-    setData(response.data.data);
+    setData(response.data.data);    
   };
 
     const formatDateToIST = (utcDate) => {
