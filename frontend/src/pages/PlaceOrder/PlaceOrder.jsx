@@ -3,11 +3,9 @@ import "./PlaceOrder.css";
 import { StoreContext } from "../../Context/StoreContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
+import axiosInstance from "../../axiosInstance";
 
 const PlaceOrder = () => {
-  //   const [name, setName] = useState("");
-  //   const [email, setEmail] = useState("");
 
   const [data, setData] = useState({
     name: "",
@@ -20,7 +18,7 @@ const PlaceOrder = () => {
     phone: "",
   });
 
-  const { getTotalCartAmount, token, food_list, cartItems, url } =
+  const { getTotalCartAmount, token, food_list, cartItems } =
     useContext(StoreContext);
 
   const navigate = useNavigate();
@@ -33,35 +31,40 @@ const PlaceOrder = () => {
 
   const placeOrder = async (e) => {
     e.preventDefault();
-    let orderItems = [];
-    food_list.map((item) => {
-      if (cartItems[item._id] > 0) {
-        let itemInfo = item;
-        itemInfo["quantity"] = cartItems[item._id];
-        orderItems.push(itemInfo);
+    try {
+      let orderItems = [];
+      food_list.forEach((item) => {
+        if (cartItems[item._id] > 0) {
+          const itemInfo = {
+            ...item,
+            quantity: cartItems[item._id],
+          };
+          orderItems.push(itemInfo);
+        }
+      });
+      let orderData = {
+        address: data,
+        items: orderItems,
+        amount: getTotalCartAmount() + 50,
+      };
+      console.log("orderData: ", orderData);
+
+      let response = await axiosInstance.post("/api/order/place", orderData);
+      console.log("response: ", response);
+
+      if (response.data.success) {
+        const { session_url } = response.data;
+        window.location.replace(session_url);
       }
-    });
-    let orderData = {
-      address: data,
-      items: orderItems,
-      amount: getTotalCartAmount() + 50,
-    };
-    let response = await axios.post(url + "/api/order/place", orderData, {
-      headers: { token },
-    });
-    if (response.data.success) {
-      const { session_url } = response.data;
-      window.location.replace(session_url);
-    } else {
+    } catch (error) {
+      console.log(error);
       toast.error("Something Went Wrong");
     }
   };
 
   const fetchUserData = async () => {
     try {
-      const res = await axios.get(url + "/api/user/profile-data", {
-        headers: { token },
-      });
+      const res = await axiosInstance.get("/api/user/profile-data");
 
       setData({
         name: res.data.data.name || "",
@@ -71,7 +74,7 @@ const PlaceOrder = () => {
         city: res.data.data.city || "",
         state: res.data.data.state || "",
         zipcode: res.data.data.zipcode || "",
-        country: res.data.data.country || ""
+        country: res.data.data.country || "",
       });
     } catch (error) {
       console.log(error);
@@ -97,14 +100,14 @@ const PlaceOrder = () => {
     <form onSubmit={placeOrder} className="place-order">
       <div className="place-order-left">
         <p className="title">Delivery Information</p>
-          <input
-            type="text"
-            name="name"
-            onChange={onChangeHandler}
-            value={data.name}
-            placeholder="Name"
-            required
-          />
+        <input
+          type="text"
+          name="name"
+          onChange={onChangeHandler}
+          value={data.name}
+          placeholder="Name"
+          required
+        />
 
         <input
           type="email"
@@ -184,7 +187,8 @@ const PlaceOrder = () => {
             <div className="cart-total-details">
               <b>Total</b>
               <b>
-                &#8377;{getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 50}
+                &#8377;
+                {getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 50}
               </b>
             </div>
           </div>

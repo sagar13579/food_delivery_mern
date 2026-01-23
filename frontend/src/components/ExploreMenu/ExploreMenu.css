@@ -5,11 +5,12 @@
 }
 .explore-menu h1{
     color: #262626;
+    font-size: 26px;
     font-weight: 500;
 }
 .explore-menu-text{
-    max-width: 60%;
     color: #808080;
+    font-size: 18px;
 }
 .explore-menu-list{
     display: flex;

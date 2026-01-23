@@ -24,6 +24,7 @@
   border: none;
   outline: none;
   font-size: 14px;
+  background-color: white;
 }
 
 /* Two inputs in one row (same as PlaceOrder) */

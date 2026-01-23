@@ -1,15 +1,15 @@
 import { useContext, useEffect, useState } from "react";
 import "./MyOrders.css";
-import axios from "axios";
 import { StoreContext } from "../../Context/StoreContext";
 import { assets } from "../../assets/assets";
+import axiosInstance from "../../axiosInstance";
 
 const MyOrders = () => {
   const [data, setData] = useState([]);
   const { url, token } = useContext(StoreContext);
 
-  const fetchOrders = async () => {
-    const response = await axios.post(
+    const fetchOrders = async () => {
+    const response = await axiosInstance.post(
       url + "/api/order/userorders",
       {},
       { headers: { token } }

@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { useContext } from 'react'
 import './ExploreMenu.css'
 import { StoreContext } from '../../Context/StoreContext'
@@ -26,4 +25,4 @@ const ExploreMenu = ({category,setCategory}) => {
   )
 }
 
-export default ExploreMenu
+export default ExploreMenu;

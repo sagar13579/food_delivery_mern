@@ -32,13 +32,20 @@ const LoginPopup = ({ setShowLogin }) => {
     }
     const response = await axios.post(new_url, data);
     if (response.data.success) {
+      const { token, role } = response.data;
+
+      if (role === "admin") {
+        window.location.href = "http://localhost:5173/admin";
+      } else {
+        window.location.href = "http://localhost:5173";
+      }
       if (currState === "Login") {
         toast.success("User logged in successfully");
       } else {
         toast.success("User registered and logged in successfully");
       }
+      localStorage.setItem("token", token);
       setToken(response.data.token);
-      localStorage.setItem("token", response.data.token);
       loadCartData({ token: response.data.token });
       setShowLogin(false);
     } else {

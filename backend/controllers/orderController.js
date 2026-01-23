@@ -1,106 +1,114 @@
 import orderModel from "../models/orderModel.js";
-import userModel from "../models/userModel.js"
+import userModel from "../models/userModel.js";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Placing User Order for Frontend
 const placeOrder = async (req, res) => {
-    try {
-        const newOrder = new orderModel({
-            userId: req.body.userId,
-            items: req.body.items,
-            amount: req.body.amount,
-            address: req.body.address,
-        })
-        await newOrder.save();
-        await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
+  try {
+    const newOrder = new orderModel({
+      userId: req.body.userId,
+      items: req.body.items,
+      amount: req.body.amount,
+      address: req.body.address,
+    });
+    console.log("newOrder: ", newOrder);
+    await newOrder.save();
+    await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
 
-        const line_items = req.body.items.map((item) => ({
-            price_data: {
-              currency: "inr",
-              product_data: {
-                name: item.name
-              },
-              unit_amount: item.price*100
-            },
-            quantity: item.quantity
-          }))
+    const line_items = req.body.items.map((item) => ({
+      price_data: {
+        currency: "inr",
+        product_data: {
+          name: item.name,
+        },
+        unit_amount: item.price * 100,
+      },
+      quantity: item.quantity,
+    }));
 
-        line_items.push({
-            price_data:{
-                currency:"inr",
-                product_data:{
-                    name:"Delivery Charge"
-                },
-                unit_amount: 50*100
-            },
-            quantity:1
-        })
-        
-          const session = await stripe.checkout.sessions.create({
-            success_url: `http://localhost:5173/verify?success=true&orderId=${newOrder._id}`,
-            cancel_url: `http://localhost:5173/verify?success=false&orderId=${newOrder._id}`,
-            line_items: line_items,
-            mode: 'payment',
-          });
-      
-          res.json({success:true,session_url:session.url});
+    line_items.push({
+      price_data: {
+        currency: "inr",
+        product_data: {
+          name: "Delivery Charge",
+        },
+        unit_amount: 50 * 100,
+      },
+      quantity: 1,
+    });
 
-    } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: "Error" })
-    }
-}
+    console.log(
+      "Stripe key prefix:",
+      process.env.STRIPE_SECRET_KEY?.slice(0, 12),
+    );
+    console.log("Stripe key length:", process.env.STRIPE_SECRET_KEY?.length);
+
+    const session = await stripe.checkout.sessions.create({
+      success_url: `http://localhost:5173/verify?success=true&orderId=${newOrder._id}`,
+      cancel_url: `http://localhost:5173/verify?success=false&orderId=${newOrder._id}`,
+      line_items: line_items,
+      mode: "payment",
+    });
+
+    console.log("session: ",session);
+
+    res.json({ success: true, session_url: session.url });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error" });
+  }
+};
 
 // Listing Order for Admin panel
 const listOrders = async (req, res) => {
-    try {
-        const orders = await orderModel.find({});
-        res.json({ success: true, data: orders })
-    } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: "Error" })
-    }
-}
+  try {
+    const orders = await orderModel.find({});
+    res.json({ success: true, data: orders });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error" });
+  }
+};
 
 // User Orders for Frontend
 const userOrders = async (req, res) => {
-    try {
-        const orders = await orderModel.find({ userId: req.body.userId });
-        res.json({ success: true, data: orders })
-    } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: "Error" })
-    }
-}
+  try {
+    const orders = await orderModel.find({ userId: req.body.userId });
+    res.json({ success: true, data: orders });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error" });
+  }
+};
 
+//Updating order status for admin panel
 const updateStatus = async (req, res) => {
-    try {
-        await orderModel.findByIdAndUpdate(req.body.orderId, { status: req.body.status });
-        res.json({ success: true, message: "Status Updated" })
-    } catch (error) {
-        res.json({ success: false, message: "Error" })
-    }
-
-}
+  try {
+    await orderModel.findByIdAndUpdate(req.body.orderId, {
+      status: req.body.status,
+    });
+    res.json({ success: true, message: "Status Updated" });
+  } catch (error) {
+    res.json({ success: false, message: "Error" });
+  }
+};
 
 const verifyOrder = async (req, res) => {
-    const {orderId , success} = req.body;
-    try {
-        if (success==="true") {
-            await orderModel.findByIdAndUpdate(orderId, { payment: true });
-            res.json({ success: true, message: "Paid" })
-        }
-        else{
-            await orderModel.findByIdAndDelete(orderId)
-            res.json({ success: false, message: "Not Paid" })
-        }
-    } catch (error) {
-        res.json({ success: false, message: "Not  Verified" })
+  const { orderId, success } = req.body;
+  try {
+    if (success === "true") {
+      await orderModel.findByIdAndUpdate(orderId, { payment: true });
+      res.json({ success: true, message: "Paid" });
+    } else {
+      await orderModel.findByIdAndDelete(orderId);
+      res.json({ success: false, message: "Not Paid" });
     }
-
-}
+  } catch (error) {
+    res.json({ success: false, message: "Not  Verified" });
+  }
+};
 
 // get today order count
 const getTodayOrders = async (req, res) => {
@@ -112,12 +120,13 @@ const getTodayOrders = async (req, res) => {
 
     // Start of today in IST → convert to UTC
     const startOfTodayIST = new Date(
-      new Date(now.getTime() + IST_OFFSET).setHours(0, 0, 0, 0) - IST_OFFSET
+      new Date(now.getTime() + IST_OFFSET).setHours(0, 0, 0, 0) - IST_OFFSET,
     );
 
     // End of today in IST → convert to UTC
     const endOfTodayIST = new Date(
-      new Date(now.getTime() + IST_OFFSET).setHours(23, 59, 59, 999) - IST_OFFSET
+      new Date(now.getTime() + IST_OFFSET).setHours(23, 59, 59, 999) -
+        IST_OFFSET,
     );
 
     const totalOrders = await orderModel.countDocuments({
@@ -142,16 +151,18 @@ const getLastDayOrders = async (req, res) => {
 
     // Start of yesterday in IST → convert to UTC
     const startOfYesterday = new Date(
-      new Date(now.getTime() + IST_OFFSET)
-        .setDate(new Date(now.getTime() + IST_OFFSET).getDate() - 1)
+      new Date(now.getTime() + IST_OFFSET).setDate(
+        new Date(now.getTime() + IST_OFFSET).getDate() - 1,
+      ),
     );
     startOfYesterday.setHours(0, 0, 0, 0);
     startOfYesterday.setTime(startOfYesterday.getTime() - IST_OFFSET);
 
     // End of yesterday in IST → convert to UTC
     const endOfYesterday = new Date(
-      new Date(now.getTime() + IST_OFFSET)
-        .setDate(new Date(now.getTime() + IST_OFFSET).getDate() - 1)
+      new Date(now.getTime() + IST_OFFSET).setDate(
+        new Date(now.getTime() + IST_OFFSET).getDate() - 1,
+      ),
     );
     endOfYesterday.setHours(23, 59, 59, 999);
     endOfYesterday.setTime(endOfYesterday.getTime() - IST_OFFSET);
@@ -160,19 +171,19 @@ const getLastDayOrders = async (req, res) => {
       payment: true,
       date: {
         $gte: startOfYesterday,
-        $lte: endOfYesterday
-      }
+        $lte: endOfYesterday,
+      },
     });
 
     return res.json({
       success: true,
-      totalOrders
+      totalOrders,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch last day orders"
+      message: "Failed to fetch last day orders",
     });
   }
 };
@@ -204,19 +215,19 @@ const getLastWeekOrders = async (req, res) => {
       payment: true,
       date: {
         $gte: startUTC,
-        $lte: endUTC
-      }
+        $lte: endUTC,
+      },
     });
 
     return res.json({
       success: true,
-      totalOrders
+      totalOrders,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch last week orders"
+      message: "Failed to fetch last week orders",
     });
   }
 };
@@ -248,21 +259,31 @@ const getLast30DaysOrders = async (req, res) => {
       payment: true,
       date: {
         $gte: startUTC,
-        $lte: endUTC
-      }
+        $lte: endUTC,
+      },
     });
 
     return res.json({
       success: true,
-      totalOrders
+      totalOrders,
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       success: false,
-      message: "Failed to fetch last 30 days orders"
+      message: "Failed to fetch last 30 days orders",
     });
   }
 };
 
-export { placeOrder, listOrders, userOrders, updateStatus ,verifyOrder, getTodayOrders, getLastDayOrders, getLastWeekOrders, getLast30DaysOrders }
+export {
+  placeOrder,
+  listOrders,
+  userOrders,
+  updateStatus,
+  verifyOrder,
+  getTodayOrders,
+  getLastDayOrders,
+  getLastWeekOrders,
+  getLast30DaysOrders,
+};

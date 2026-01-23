@@ -1,12 +1,12 @@
 /* eslint-disable react/prop-types */
 import { createContext, useEffect, useState } from "react";
 import { menu_list } from "../assets/assets";
-import axios from "axios";
+import axiosInstance from "../axiosInstance";
 
 export const StoreContext = createContext(null);
 
 const StoreContextProvider = (props) => {
-  const url = "https://food-delivery-backend-8ybk.onrender.com";
+  const url = "http://localhost:4000";
   const [food_list, setFoodList] = useState([]);
   const [cartItems, setCartItems] = useState({});
   const [token, setToken] = useState("");
@@ -18,22 +18,14 @@ const StoreContextProvider = (props) => {
       setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
     }
     if (token) {
-      await axios.post(
-        url + "/api/cart/add",
-        { itemId },
-        { headers: { token } }
-      );
+      await axiosInstance.post("/api/cart/add", { itemId });
     }
   };
 
   const removeFromCart = async (itemId) => {
     setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] - 1 }));
     if (token) {
-      await axios.post(
-        url + "/api/cart/remove",
-        { itemId },
-        { headers: { token } }
-      );
+      await axiosInstance.post("/api/cart/remove", { itemId });
     }
   };
 
@@ -56,16 +48,12 @@ const StoreContextProvider = (props) => {
   };
 
   const fetchFoodList = async () => {
-    const response = await axios.get(url + "/api/food/list");
+    const response = await axiosInstance.get("/api/food/list");
     setFoodList(response.data.data);
   };
 
-  const loadCartData = async (token) => {
-    const response = await axios.post(
-      url + "/api/cart/get",
-      {},
-      { headers: token }
-    );
+  const loadCartData = async () => {
+    const response = await axiosInstance.post("/api/cart/get");
     setCartItems(response.data.cartData);
   };
 

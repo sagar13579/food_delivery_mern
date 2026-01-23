@@ -1,8 +1,8 @@
 .navbar {
-    padding: 20px 0px;
     display: flex;
-    justify-content: space-between;
+    justify-content:center;
     align-items: center;
+    gap: 290px;
 }
 
 .navbar .logo {
@@ -59,14 +59,26 @@ position: relative;
 
 .navbar-profile{
     position: relative;
-
 }
+
 .navbar-profile-dropdown{
-    position: absolute;
+    /* position: absolute;
     display: none;
     right: 0;
-    z-index: 1;
+    z-index: 1; */
+    position: absolute;
+    top: 100%;
+    right: 0;
+    display: none;
+    z-index: 10;
+
+    background: white;
+    padding: 10px 10px;   /* equal padding */
+    min-width: 140px;     /* consistent width */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    border-radius: 6px;
 }
+
 .navbar-profile-dropdown li{
     display: flex;
     align-items: center;

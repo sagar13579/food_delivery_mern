@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema(
       zipcode: { type: String },
       country: { type: String },
     },
+    role:{
+        type: String,
+        required: true,
+        enum: ["admin","manager","user"]
+    },
     cartData: { type: Object, default: {} },
   },
   { minimize: false }
