@@ -23,7 +23,7 @@ const UnAuthorized = () => {
         </Link>
 
         <button
-          onClick={() => window.location.replace("http://localhost:5173")}
+          onClick={() => window.location.replace("https://food-delivery-frontend-jan.onrender.com")}
           className="px-6 py-2 rounded-md bg-gray-600 text-white cursor-pointer hover:bg-gray-700 transition"
         >
           Go to User App
