@@ -34,10 +34,10 @@ const LoginPopup = ({ setShowLogin }) => {
     if (response.data.success) {
       const { token, role } = response.data;
 
-      if (role === "admin") {
-        window.location.href = "http://localhost:5173/admin";
+      if (role == "admin") {
+        window.location.href = "https://food-delivery-frontend-jan.onrender.com/admin";
       } else {
-        window.location.href = "http://localhost:5173";
+        window.location.href = "https://food-delivery-frontend-jan.onrender.com";
       }
       if (currState === "Login") {
         toast.success("User logged in successfully");
