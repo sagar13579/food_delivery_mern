@@ -46,8 +46,8 @@ const placeOrder = async (req, res) => {
     console.log("Stripe key length:", process.env.STRIPE_SECRET_KEY?.length);
 
     const session = await stripe.checkout.sessions.create({
-      success_url: `http://localhost:5173/verify?success=true&orderId=${newOrder._id}`,
-      cancel_url: `http://localhost:5173/verify?success=false&orderId=${newOrder._id}`,
+      success_url: `https://food-delivery-frontend-jan.onrender.com/verify?success=true&orderId=${newOrder._id}`,
+      cancel_url: `https://food-delivery-frontend-jan.onrender.com/verify?success=false&orderId=${newOrder._id}`,
       line_items: line_items,
       mode: "payment",
     });
