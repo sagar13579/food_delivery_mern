@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: food-delivery-frontend-jan
+    env: static
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
