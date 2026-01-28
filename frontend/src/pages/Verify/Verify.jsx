@@ -1,12 +1,10 @@
-import { useContext, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { StoreContext } from '../../Context/StoreContext';
 import './Verify.css'
 import axiosInstance from '../../axiosInstance';
 
 const Verify = () => {
-  const { url } = useContext(StoreContext)
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const success = searchParams.get("success")
   const orderId = searchParams.get("orderId") 
 
@@ -34,7 +32,7 @@ const verifyPayment = async () => {
 
   useEffect(() => {
     verifyPayment();
-  }, [])
+  }, [success, orderId])
 
   return (
     <div className='verify'>
