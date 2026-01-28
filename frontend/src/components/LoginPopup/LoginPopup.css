@@ -9,7 +9,7 @@
 .login-popup-container{
     place-self: center;
     width: max(23vw,330px);
-    color: #808080;
+    color: black;
     background-color: white;
     display: flex;
     flex-direction: column;
@@ -24,6 +24,10 @@
     justify-content: space-between;
     align-items: center;
     color: black;
+}
+.title{
+    font-size: 20px;
+    font-weight: 500;
 }
 .login-popup-title img{
     width: 16px;

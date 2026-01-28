@@ -4,10 +4,12 @@ import { assets } from "../../assets/assets";
 import { StoreContext } from "../../Context/StoreContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const LoginPopup = ({ setShowLogin }) => {
   const { setToken, url, loadCartData } = useContext(StoreContext);
   const [currState, setCurrState] = useState("Sign Up");
+  const navigate = useNavigate();
 
   const [data, setData] = useState({
     name: "",
@@ -35,9 +37,9 @@ const LoginPopup = ({ setShowLogin }) => {
       const { token, role } = response.data;
 
       if (role == "admin") {
-        window.location.href = "https://food-delivery-frontend-jan.onrender.com/admin";
+        navigate("/admin");
       } else {
-        window.location.href = "https://food-delivery-frontend-jan.onrender.com";
+        navigate("/");
       }
       if (currState === "Login") {
         toast.success("User logged in successfully");
@@ -57,7 +59,7 @@ const LoginPopup = ({ setShowLogin }) => {
     <div className="login-popup">
       <form onSubmit={onLogin} className="login-popup-container">
         <div className="login-popup-title">
-          <h2>{currState}</h2>{" "}
+          <div className="title">{currState}</div>
           <img
             onClick={() => setShowLogin(false)}
             src={assets.cross_icon}
